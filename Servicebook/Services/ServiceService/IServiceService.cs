@@ -4,10 +4,10 @@ namespace Servicebook.Services.ServiceService
 {
     public interface IServiceService
     {
-        List<Service> GetServices();
-        Service? GetService(int id);
-        List<Service> AddService(Service service);
-        List<Service>? UpdateService(int id, Service service);
-        List<Service>? DeleteService(int id);
+        Task<List<Service>> GetServices();
+        Task<Service>? GetService(int id);
+        Task<List<Service>> AddService(Service service);
+        Task<List<Service>>? UpdateService(int id, Service service);
+        Task<List<Service>>? DeleteService(int id);
     }
 }

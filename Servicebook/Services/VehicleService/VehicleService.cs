@@ -1,73 +1,61 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
+using Servicebook.Data;
 using Servicebook.Models;
 
 namespace Servicebook.Services.VehicleService
 {
     public class VehicleService : IVehicleService
     {
-        private static List<Vehicle> vehicles = new List<Vehicle>
-        {
-            new Vehicle
-            {
-                Id = 1,
-                Brand = "BMW",
-                Type = "X5",
-                ModelName = "M",
-                LicensePlate = "ABC123",
-                Year = 2019,
-                Color = "Black"
-            },
-            new Vehicle
-            {
-                Id = 2,
-                Brand = "Audi",
-                Type = "A4",
-                ModelName = "S",
-                LicensePlate = "DEF456",
-                Year = 2018,
-                Color = "White"
-            },
-            new Vehicle
-            {
-                Id = 3,
-                Brand = "Mercedes",
-                Type = "C",
-                ModelName = "AMG",
-                LicensePlate = "GHI789",
-                Year = 2017,
-                Color = "Red"
-            }
-        };
+        private readonly DataContext _dataContext;
 
-        public List<Vehicle> AddVehicle(Vehicle vehicle)
+        public VehicleService(DataContext dataContext)
         {
-            vehicles.Add(vehicle);
-            return vehicles;
+            _dataContext = dataContext;
         }
 
-        public List<Vehicle>? DeleteVehicle(int id)
+        public async Task<List<Vehicle>> AddVehicle(Vehicle vehicle)
         {
-            var vehicleToDelete = vehicles.FirstOrDefault(v => v.Id == id);
+            await _dataContext.Vehicles.AddAsync(vehicle);
+            await _dataContext.SaveChangesAsync();
+            return await _dataContext.Vehicles.ToListAsync();
+        }
+
+        public async Task<List<Vehicle>>? DeleteVehicle(int id)
+        {
+            var vehicleToDelete = await _dataContext.Vehicles.FindAsync(id);
             if (vehicleToDelete is null) return null;
-            vehicles.Remove(vehicleToDelete);
-            return vehicles;
+
+            _dataContext.Vehicles.Remove(vehicleToDelete);
+
+            await _dataContext.SaveChangesAsync();
+
+            return await _dataContext.Vehicles.ToListAsync();
         }
 
-        public Vehicle? GetVehicle(int id)
+        public async Task<Vehicle>? GetVehicle(int id)
         {
-            var vehicle = vehicles.FirstOrDefault(v => v.Id == id);
+            var vehicle = await _dataContext.Vehicles.FindAsync(id);
             if (vehicle is null) return null;
             return vehicle;
         }
 
-        public List<Vehicle> GetVehicles()
+        //public List<Service>? GetVehicleServices(int id)
+        //{
+        //    var vehicle = vehicles.FirstOrDefault(v => v.Id == id);
+        //    if (vehicle is null) return null;
+
+        //    return vehicle.Services;
+        //}
+
+        public async Task<List<Vehicle>> GetVehicles()
         {
-            return (vehicles);
+            return await _dataContext.Vehicles.ToListAsync();
         }
 
-        public List<Vehicle>? UpdateVehicle(int id, Vehicle vehicle)
+        public async Task<List<Vehicle>>? UpdateVehicle(int id, Vehicle vehicle)
         {
-            var vehicleToUpdate = vehicles.FirstOrDefault(v => v.Id == id);
+            var vehicleToUpdate = await _dataContext.Vehicles.FindAsync(id);
             if (vehicleToUpdate is null) return null;
             vehicleToUpdate.Brand = vehicle.Brand;
             vehicleToUpdate.Type = vehicle.Type;
@@ -75,9 +63,10 @@ namespace Servicebook.Services.VehicleService
             vehicleToUpdate.LicensePlate = vehicle.LicensePlate;
             vehicleToUpdate.Year = vehicle.Year;
             vehicleToUpdate.Color = vehicle.Color;
-            return vehicles;
 
-            
+            await _dataContext.SaveChangesAsync();
+
+            return await _dataContext.Vehicles.ToListAsync();
         }
     }
 }

@@ -1,41 +1,45 @@
-﻿using Servicebook.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Servicebook.Data;
+using Servicebook.Models;
 
 namespace Servicebook.Services.ServiceService
 {
     public class ServiceService : IServiceService
     {
-        private static List<Service> services = new List<Service>
-        {
-            new Service { Id = 1, VehicleId = 1, Date = DateTime.Now, Name="Oil", Description = "Oil change", Cost = 100 },
-            new Service { Id = 2, VehicleId = 1, Date = DateTime.Now, Name="Tire", Description = "Tire change", Cost = 200 },
-            new Service { Id = 3, VehicleId = 2, Date = DateTime.Now, Name="Oil", Description = "Oil change", Cost = 100 }
-        };
+        private readonly DataContext _dataContext;
 
-        public List<Service> GetServices()
+        public ServiceService(DataContext dataContext)
         {
+            _dataContext = dataContext;
+        }
+
+        public async Task<List<Service>> GetServices()
+        {
+            var services = await _dataContext.Services.ToListAsync();
             return services;
         }
 
-        public Service? GetService(int id)
+        public async Task<Service?> GetService(int id)
         {
-            var service = services.FirstOrDefault(s => s.Id == id);
+            var service = await _dataContext.Services.FindAsync(id);
             if(service == null)
             {
                 return null;
             }
-            return service;
+            return await _dataContext.Services.FindAsync(id);
         }
 
-        public List<Service> AddService(Service service)
+        public async Task<List<Service>> AddService(Service service)
         {
-            services.Add(service);
-            return services;
+            _dataContext.Services.AddAsync(service);
+            await _dataContext.SaveChangesAsync();
+            return await _dataContext.Services.ToListAsync();
         }
 
-        public List<Service>? UpdateService(int id, Service service)
+        public async Task<List<Service>>? UpdateService(int id, Service service)
         {
-            var serviceToUpdate = services.FirstOrDefault(s => s.Id == id);
-            if(serviceToUpdate == null)
+            var serviceToUpdate = await _dataContext.Services.FindAsync(id);
+            if (serviceToUpdate == null)
             {
                 return null;
             }
@@ -44,18 +48,23 @@ namespace Servicebook.Services.ServiceService
             serviceToUpdate.Name = service.Name;
             serviceToUpdate.Description = service.Description;
             serviceToUpdate.Cost = service.Cost;
-            return services;
+            await _dataContext.SaveChangesAsync();
+
+            return await _dataContext.Services.ToListAsync();
         }
 
-        public List<Service>? DeleteService(int id)
+        public async Task<List<Service>>? DeleteService(int id)
         {
-            var serviceToDelete = services.FirstOrDefault(s => s.Id == id);
-            if(serviceToDelete == null)
+            var serviceToDelete = await _dataContext.Services.FindAsync(id);
+            if (serviceToDelete == null)
             {
                 return null;
             }
-            services.Remove(serviceToDelete);
-            return services;
+            _dataContext.Services.Remove(serviceToDelete);
+
+            await _dataContext.SaveChangesAsync();
+
+            return await _dataContext.Services.ToListAsync();
         }
     }
 }

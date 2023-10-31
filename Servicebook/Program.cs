@@ -1,3 +1,4 @@
+using Servicebook.Data;
 using Servicebook.Services.ServiceService;
 using Servicebook.Services.VehicleService;
 
@@ -12,6 +13,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IServiceService, ServiceService>();
 // builder.Sercices.AddScoped<IUserService, UserService>();
+builder.Services.AddDbContext<DataContext>();
 
 var app = builder.Build();
 

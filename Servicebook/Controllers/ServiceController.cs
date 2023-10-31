@@ -19,15 +19,14 @@ namespace Servicebook.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Service>>> GetServices()
         {
-            var result = _serviceService.GetServices();
-            return Ok(result);
+            return await _serviceService.GetServices();
         }
 
         // GET: api/Service/5
-        [HttpGet("{id}", Name = "Get")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<List<Service>>> GetService(int id)
         {
-            var result = _serviceService.GetService(id);
+            var result = await _serviceService.GetService(id);
             if(result == null)
             {
                 return NotFound("Service not found!");
@@ -39,7 +38,7 @@ namespace Servicebook.Controllers
         [HttpPost]
         public async Task<ActionResult<List<Service>>> AddService(Service service)
         {
-            var result = _serviceService.AddService(service);
+            var result = await _serviceService.AddService(service);
             return Ok(result);
         }
 
@@ -47,7 +46,7 @@ namespace Servicebook.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<List<Service>>> UpdateService(int id, Service service)
         {
-            var result = _serviceService.UpdateService(id, service);
+            var result = await _serviceService.UpdateService(id, service);
             if(result == null)
             {
                 return NotFound("Service not found!");
@@ -59,7 +58,7 @@ namespace Servicebook.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<List<Service>>> DeleteService(int id)
         {
-            var result = _serviceService.DeleteService(id);
+            var result = await _serviceService.DeleteService(id);
             if(result == null)
             {
                 return NotFound("Service not found!");
