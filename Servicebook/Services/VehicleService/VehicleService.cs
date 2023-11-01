@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Servicebook.Data;
+using Servicebook.Dtos;
 using Servicebook.Models;
 
 namespace Servicebook.Services.VehicleService
@@ -14,12 +16,22 @@ namespace Servicebook.Services.VehicleService
             _dataContext = dataContext;
         }
 
-        public async Task<List<Vehicle>> AddVehicle(Vehicle vehicle)
+        public async Task<List<Vehicle>> AddVehicle(VehicleCreateDto request)
         {
+            var vehicle = new Vehicle
+            {
+                Brand = request.Brand,
+                Type = request.Type,
+                ModelName = request.ModelName,
+                LicensePlate = request.LicensePlate,
+                Year = request.Year,
+                Color = request.Color
+            };
             await _dataContext.Vehicles.AddAsync(vehicle);
             await _dataContext.SaveChangesAsync();
             return await _dataContext.Vehicles.ToListAsync();
         }
+
 
         public async Task<List<Vehicle>>? DeleteVehicle(int id)
         {
@@ -33,24 +45,22 @@ namespace Servicebook.Services.VehicleService
             return await _dataContext.Vehicles.ToListAsync();
         }
 
-        public async Task<Vehicle>? GetVehicle(int id)
+        public async Task<ActionResult<Vehicle>>? GetVehicle(int id)
         {
-            var vehicle = await _dataContext.Vehicles.FindAsync(id);
+            var vehicle = await _dataContext.Vehicles
+                .Include(v => v.Services)
+                .FirstOrDefaultAsync(c => c.Id == id);
             if (vehicle is null) return null;
             return vehicle;
         }
 
-        //public List<Service>? GetVehicleServices(int id)
-        //{
-        //    var vehicle = vehicles.FirstOrDefault(v => v.Id == id);
-        //    if (vehicle is null) return null;
-
-        //    return vehicle.Services;
-        //}
-
         public async Task<List<Vehicle>> GetVehicles()
         {
-            return await _dataContext.Vehicles.ToListAsync();
+            var vehicles = await _dataContext.Vehicles
+                .Include(v => v.Services)
+                .ToListAsync();
+            if(vehicles is null) return null;
+            return vehicles;
         }
 
         public async Task<List<Vehicle>>? UpdateVehicle(int id, Vehicle vehicle)
@@ -67,6 +77,40 @@ namespace Servicebook.Services.VehicleService
             await _dataContext.SaveChangesAsync();
 
             return await _dataContext.Vehicles.ToListAsync();
+        }
+        public async Task<Vehicle> AddServiceToVehicle(Service service, int vehId)
+        {
+            // find vehicle by id
+            Vehicle vehicle = await _dataContext.Vehicles.FindAsync(vehId);
+            if (vehicle is null) return null;
+
+            // add service to vehicle
+            vehicle.Services.Add(service);
+            await _dataContext.SaveChangesAsync();
+
+            return vehicle;
+        }
+        public async Task<Vehicle>? DeleteServiceFromVehicle(int vehId, int servId)
+        {
+            // find vehicle by id
+            Vehicle vehicle = await _dataContext.Vehicles.FindAsync(vehId);
+            if (vehicle is null) return null;
+
+            // find service by id
+            Service service = await _dataContext.Services.FindAsync(servId);
+            if (service is null) return null;
+
+            // remove service from vehicle
+            vehicle.Services.Remove(service);
+            
+            // remove service from database
+            _dataContext.Services.Remove(service);
+
+            await _dataContext.SaveChangesAsync();
+
+            return await _dataContext.Vehicles
+                .Include(v => v.Services)
+                .FirstOrDefaultAsync(c => c.Id == vehId);
         }
     }
 }

@@ -34,13 +34,13 @@ namespace Servicebook.Controllers
             return Ok(result);
         }
 
-        // POST: api/Service
-        [HttpPost]
-        public async Task<ActionResult<List<Service>>> AddService(Service service)
-        {
-            var result = await _serviceService.AddService(service);
-            return Ok(result);
-        }
+        //// POST: api/Service
+        //[HttpPost]
+        //public async Task<ActionResult<List<Service>>> AddService(Service service)
+        //{
+        //    var result = await _serviceService.AddService(service);
+        //    return Ok(result);
+        //}
 
         // PUT: api/Service/5
         [HttpPut("{id}")]
@@ -65,5 +65,23 @@ namespace Servicebook.Controllers
             }
             return Ok(result);
         }
+
+        // POST: api/service
+        [HttpPost]
+        public async Task<ActionResult<List<Service>>> AddService(Service service)
+        {
+            var result = await _serviceService.AddService(service);
+            return Ok(result);
+        }
+
+        //// POST: api/service/vehicle/5
+        //[HttpPost]
+        //[Route("vehicle/{id}")]
+        //public async Task<ActionResult<List<Service>>> AddServiceToVehicle(int id, Service service)
+        //{
+        //    var result = await _serviceService.AddServiceToVehicle(service, id);
+        //    return Ok(result);
+        //}
+
     }
 }

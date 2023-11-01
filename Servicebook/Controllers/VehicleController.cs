@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Servicebook.Dtos;
 using Servicebook.Models;
 using Servicebook.Services.VehicleService;
 
@@ -36,23 +37,11 @@ namespace Servicebook.Controllers
             return Ok(result);
         }
 
-        // GET: api/Vehicle/5/Services
-        //[HttpGet("{id}/Services")]
-        //public async Task<ActionResult<List<Service>>> GetVehicleServices(int id)
-        //{
-        //    var result = _vehicleService.GetVehicleServices(id);
-        //    if(result == null)
-        //    {
-        //        return NotFound("Vehicle not found!");
-        //    }
-        //    return Ok(result);
-        //}
-
         // POST: api/Vehicle
         [HttpPost]
-        public async Task<ActionResult<List<Vehicle>>> AddVehicle(Vehicle vehicle)
+        public async Task<ActionResult<List<Vehicle>>> AddVehicle(VehicleCreateDto request)
         {
-            var result = await _vehicleService.AddVehicle(vehicle);
+            var result = await _vehicleService.AddVehicle(request);
             return Ok(result);
         }
 
@@ -68,7 +57,7 @@ namespace Servicebook.Controllers
             return Ok(result);
         }
 
-        // DELETE: api/ApiWithActions/5
+        // DELETE: api/Vehicle/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<List<Vehicle>>> DeleteVehicle(int id)
         {
@@ -80,5 +69,28 @@ namespace Servicebook.Controllers
             return Ok(result);
         }
 
+        // POST: api/Vehicle/5/service/
+        [HttpPost("{id}/service")]
+        public async Task<ActionResult<List<Vehicle>>> AddServiceToVehicle(Service service, int id)
+        {
+            var result = await _vehicleService.AddServiceToVehicle(service, id);
+            if(result == null)
+            {
+                return NotFound("Vehicle not found!");
+            }
+            return Ok(result);
+        }
+
+        //DELETE: api/Vehicle/5/service/1
+        [HttpDelete("{id}/service/{serviceId}")]
+        public async Task<ActionResult<List<Vehicle>>> DeleteServiceFromVehicle(int id, int serviceId)
+        {
+            var result = await _vehicleService.DeleteServiceFromVehicle(id, serviceId);
+            if(result == null)
+            {
+                return NotFound("Vehicle or service not found!");
+            }
+            return Ok(result);
+        }
     }
 }
