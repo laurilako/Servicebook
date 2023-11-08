@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Servicebook.Models;
 
 namespace Servicebook.Data
 {
@@ -14,8 +15,7 @@ namespace Servicebook.Data
             optionsBuilder.UseSqlite("Data Source=servicebook.db");
         }
 
-        public DbSet<Servicebook.Models.Service> Services { get; set; }
-        public DbSet<Servicebook.Models.Vehicle> Vehicles { get; set; }
-
+        public DbSet<Service> Services { get; set; }
+        public DbSet<Vehicle> Vehicles { get; set; }
     }
 }

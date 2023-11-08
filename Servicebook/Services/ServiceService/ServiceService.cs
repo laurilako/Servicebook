@@ -31,10 +31,26 @@ namespace Servicebook.Services.ServiceService
 
         public async Task<List<Service>> AddService(Service service)
         {
-            _dataContext.Services.AddAsync(service);
+            await _dataContext.Services.AddAsync(service);
             await _dataContext.SaveChangesAsync();
             return await _dataContext.Services.ToListAsync();
         }
+
+        //public async Task<List<Service>> AddServiceToVehicle(Service service, int vehId)
+        //{
+        //    // find vehicle by id
+        //    Vehicle vehicle = await _dataContext.Vehicles.FindAsync(vehId);
+        //    if(vehicle == null)
+        //    {
+        //        return null;
+        //    }
+            
+        //    // add service to vehicle
+        //    vehicle.Services.Add(service);
+        //    await _dataContext.SaveChangesAsync();
+
+        //    return await _dataContext.Services.ToListAsync();
+        //}
 
         public async Task<List<Service>>? UpdateService(int id, Service service)
         {
@@ -43,7 +59,7 @@ namespace Servicebook.Services.ServiceService
             {
                 return null;
             }
-            serviceToUpdate.VehicleId = service.VehicleId;
+             
             serviceToUpdate.Date = service.Date;
             serviceToUpdate.Name = service.Name;
             serviceToUpdate.Description = service.Description;
