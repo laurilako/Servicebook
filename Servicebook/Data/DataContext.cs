@@ -15,6 +15,15 @@ namespace Servicebook.Data
             optionsBuilder.UseSqlite("Data Source=servicebook.db");
         }
 
+        // Unique LicensePlate
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Vehicle>()
+                .HasIndex(v => v.LicensePlate)
+                .IsUnique();
+        }
+
         public DbSet<Service> Services { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
     }

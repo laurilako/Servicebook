@@ -37,36 +37,69 @@ namespace Servicebook.Controllers
             return Ok(result);
         }
 
+        // GET: api/Vehicle/licensePlate/ABC123
+        [HttpGet("licensePlate/{licensePlate}")]
+        public async Task<ActionResult<List<Vehicle>>> GetVehicleByLicensePlate(string licensePlate)
+        {
+            var result = await _vehicleService.GetVehicleByLicensePlate(licensePlate);
+            if(result == null)
+            {
+                return NotFound("Vehicle not found!");
+            }
+            return Ok(result);
+        }
+
         // POST: api/Vehicle
         [HttpPost]
         public async Task<ActionResult<List<Vehicle>>> AddVehicle(VehicleCreateDto request)
         {
-            var result = await _vehicleService.AddVehicle(request);
-            return Ok(result);
+            List<Vehicle> result;
+            try
+            {
+                result = await _vehicleService.AddVehicle(request);
+                return Ok(result);
+            } catch (Exception e)
+            {
+                if (e.Message == "Vehicle with this license plate already exists!")
+                {
+                    return StatusCode(StatusCodes.Status409Conflict, e.Message);
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
         }
 
-        // PUT: api/Vehicle/5
-        [HttpPut("{id}")]
-        public async Task<ActionResult<List<Vehicle>>> UpdateVehicle(int id, Vehicle vehicle)
+        // PUT: api/Vehicle/XXX123
+        [HttpPut("{licensePlate}")]
+        public async Task<ActionResult<Vehicle>> UpdateVehicle(string licensePlate, Vehicle vehicle)
         {
-            var result = await _vehicleService.UpdateVehicle(id, vehicle);
-            if(result == null)
+            Vehicle result;
+            try
             {
-                return NotFound("Vehicle not found!");
+                result = await _vehicleService.UpdateVehicle(licensePlate, vehicle);
+                return Ok(result);
+            } catch (Exception e)
+            {
+                if (e.Message == "Vehicle not found!") return StatusCode(StatusCodes.Status404NotFound, e.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
             }
-            return Ok(result);
         }
 
-        // DELETE: api/Vehicle/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<List<Vehicle>>> DeleteVehicle(int id)
+        // DELETE: api/Vehicle/XXX123
+        [HttpDelete("{licensePlate}")]
+        public async Task<ActionResult<List<Vehicle>>> DeleteVehicle(string licensePlate)
         {
-            var result = await _vehicleService.DeleteVehicle(id);
-            if(result == null)
+            try
             {
-                return NotFound("Vehicle not found!");
+                var result = await _vehicleService.DeleteVehicle(licensePlate);
+                return Ok(result);
+            } catch (Exception e)
+            {
+                if (e.Message == "Vehicle not found!")
+                {
+                    return StatusCode(StatusCodes.Status404NotFound, e.Message);
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
             }
-            return Ok(result);
         }
 
         // POST: api/Vehicle/5/service/

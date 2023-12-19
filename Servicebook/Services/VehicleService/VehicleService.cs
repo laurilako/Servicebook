@@ -18,6 +18,11 @@ namespace Servicebook.Services.VehicleService
 
         public async Task<List<Vehicle>> AddVehicle(VehicleCreateDto request)
         {
+            // check if vehicle with license plate already exists
+            var vehicleExists = await _dataContext.Vehicles
+                .FirstOrDefaultAsync(v => v.LicensePlate == request.LicensePlate);
+            if (vehicleExists != null) throw new Exception("Vehicle with this license plate already exists!");
+
             var vehicle = new Vehicle
             {
                 Brand = request.Brand,
@@ -27,19 +32,38 @@ namespace Servicebook.Services.VehicleService
                 Year = request.Year,
                 Color = request.Color
             };
+
             await _dataContext.Vehicles.AddAsync(vehicle);
             await _dataContext.SaveChangesAsync();
             return await _dataContext.Vehicles.ToListAsync();
         }
 
-
-        public async Task<List<Vehicle>>? DeleteVehicle(int id)
+        // update vehicle by license plate
+        public async Task<Vehicle>? UpdateVehicle(string licensePlate, Vehicle vehicle)
         {
-            var vehicleToDelete = await _dataContext.Vehicles.FindAsync(id);
-            if (vehicleToDelete is null) return null;
+            var vehToUpdate = await _dataContext.Vehicles.
+                FirstOrDefaultAsync(v => v.LicensePlate == licensePlate);
+            if (vehToUpdate is null) throw new Exception("Vehicle not found!");
 
-            _dataContext.Vehicles.Remove(vehicleToDelete);
+            vehToUpdate.Brand = vehicle.Brand;
+            vehToUpdate.Type = vehicle.Type;
+            vehToUpdate.ModelName = vehicle.ModelName;
+            vehToUpdate.LicensePlate = vehicle.LicensePlate;
+            vehToUpdate.Year = vehicle.Year;
+            vehToUpdate.Color = vehicle.Color;
 
+            await _dataContext.SaveChangesAsync();
+
+            return vehicle;
+        }
+
+        public async Task<List<Vehicle>>? DeleteVehicle(string licensePlate)
+        {
+            var vehToDelete = await _dataContext.Vehicles.
+                FirstOrDefaultAsync(v => v.LicensePlate == licensePlate);
+            if (vehToDelete is null) throw new Exception("Vehicle not found!");
+
+            _dataContext.Vehicles.Remove(vehToDelete);
             await _dataContext.SaveChangesAsync();
 
             return await _dataContext.Vehicles.ToListAsync();
@@ -54,6 +78,15 @@ namespace Servicebook.Services.VehicleService
             return vehicle;
         }
 
+        public async Task<ActionResult<Vehicle>>? GetVehicleByLicensePlate(string licensePlate)
+        {
+            var vehicle = await _dataContext.Vehicles
+                .Include(v => v.Services)
+                .FirstOrDefaultAsync(c => c.LicensePlate == licensePlate);
+            if (vehicle is null) return null;
+            return vehicle;
+        }
+
         public async Task<List<Vehicle>> GetVehicles()
         {
             var vehicles = await _dataContext.Vehicles
@@ -63,21 +96,6 @@ namespace Servicebook.Services.VehicleService
             return vehicles;
         }
 
-        public async Task<List<Vehicle>>? UpdateVehicle(int id, Vehicle vehicle)
-        {
-            var vehicleToUpdate = await _dataContext.Vehicles.FindAsync(id);
-            if (vehicleToUpdate is null) return null;
-            vehicleToUpdate.Brand = vehicle.Brand;
-            vehicleToUpdate.Type = vehicle.Type;
-            vehicleToUpdate.ModelName = vehicle.ModelName;
-            vehicleToUpdate.LicensePlate = vehicle.LicensePlate;
-            vehicleToUpdate.Year = vehicle.Year;
-            vehicleToUpdate.Color = vehicle.Color;
-
-            await _dataContext.SaveChangesAsync();
-
-            return await _dataContext.Vehicles.ToListAsync();
-        }
         public async Task<Vehicle> AddServiceToVehicle(Service service, int vehId)
         {
             // find vehicle by id

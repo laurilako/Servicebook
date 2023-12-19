@@ -8,9 +8,10 @@ namespace Servicebook.Services.VehicleService
     {
         Task<List<Vehicle>> GetVehicles();
         Task<ActionResult<Vehicle>>? GetVehicle(int id);
+        Task<ActionResult<Vehicle>>? GetVehicleByLicensePlate(string licensePlate);
         Task<List<Vehicle>> AddVehicle(VehicleCreateDto request);
-        Task<List<Vehicle>>? UpdateVehicle(int id, Vehicle vehicle);
-        Task<List<Vehicle>>? DeleteVehicle(int id);
+        Task<Vehicle>? UpdateVehicle(string licensePlate, Vehicle vehicle);
+        Task<List<Vehicle>>? DeleteVehicle(string licensePlate);
         Task<Vehicle>? AddServiceToVehicle(Service service, int vehId);
         Task<Vehicle>? DeleteServiceFromVehicle(int vehId, int servId);
     }
